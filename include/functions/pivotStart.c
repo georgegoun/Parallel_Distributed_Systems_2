@@ -1,5 +1,5 @@
 #include "pivotStart.h"
-#include "../helpers/quickSort.h"
+#include "../helpers/quickSelect.h"
 #include <math.h>
 #include <mpi.h>
 #include <stdio.h>
@@ -13,6 +13,7 @@ int pivotStart(int my_id, int num_procs, int data_length, int* data)
     int seperator = 0;
     int pivot = 0;
     double* pro_data_distance = malloc(sizeof(double) * seperator);
+
     double median = 0;
     seperator = data_length / num_procs;
     if (my_id == 0) {
@@ -39,6 +40,20 @@ int pivotStart(int my_id, int num_procs, int data_length, int* data)
             MPI_Send(&pivot, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
         }
 
+        // Parent Distances
+
+        double* parent_data_distance = malloc(sizeof(double) * parent_data_length);
+        for (int i = 0; i < parent_data_length; i++) {
+            double euc_distance = 0;
+            if (pivot > parent_data[i]) {
+                euc_distance = sqrt((pivot * pivot) - (parent_data[i] * parent_data[i]));
+                parent_data_distance[i] = euc_distance;
+            } else {
+                euc_distance = sqrt((parent_data[i] * parent_data[i]) - (pivot * pivot));
+                parent_data_distance[i] = euc_distance;
+            }
+        }
+
         // Recieving Distances
 
         for (int i = 1; i < num_procs; i++) {
@@ -54,17 +69,28 @@ int pivotStart(int my_id, int num_procs, int data_length, int* data)
             printf(" %.2lf", all_distances[i]);
         }
         printf("\n");
-        quickSort(all_distances, 0, n - 1);
+        // quickSort(all_distances, 0, n - 1);
+        // for (int i = 0; i < n; i++) {
+        //     printf(" %.2lf", all_distances[i]);
+        // }
+        // if (n % 2 == 0) {
+        //     median = (all_distances[n / 2] + all_distances[(n / 2) - 1]) / 2;
+        // } else {
+        //     median = (all_distances[n / 2]);
+        // }
+
+        // printf("\n median number is %.2lf\n", median);
+
+        if (n % 2 == 0) {
+            median = (quickselect(all_distances, 0, n - 1, n / 2) + quickselect(all_distances, 0, n - 1, (n / 2) - 1)) / 2;
+        } else {
+            median = quickselect(all_distances, 0, n - 1, n / 2);
+        }
+        printf("median is: %.2lf\n", median);
         for (int i = 0; i < n; i++) {
             printf(" %.2lf", all_distances[i]);
         }
-        if (n % 2 == 0) {
-            median = (all_distances[n / 2] + all_distances[(n / 2) - 1]) / 2;
-        } else {
-            median = (all_distances[n / 2]);
-        }
-
-        printf("\n median number is %.2lf\n", median);
+        printf("\n");
     } else {
         int* pro_data = malloc(sizeof(int) * seperator);
         pro_data = &data[(seperator * (my_id - 1))];
