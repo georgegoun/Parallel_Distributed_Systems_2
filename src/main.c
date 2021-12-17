@@ -29,14 +29,16 @@ int main(int argc, char* argv[])
             return 0;
         }
     }
-    int proc_data_length = data_length / num_procs;
 
-    double* dist_data = malloc(sizeof(double) * proc_data_length);
+    double* dist_data = malloc(sizeof(double) * data_length);
     median_value
         = median(my_id, num_procs, data_length, data, dist_data);
-
-    // distributeByMedian(my_id, num_procs, proc_data_length, dist_data, median_value);
-    printf("allok %i\n", my_id);
+    // printf("ID: %d......", my_id);
+    // for (int i = 0; i < data_length; i++) {
+    //     printf("%.2lf ", dist_data[i]);
+    // }
+    // printf("\n");
+    //distributeByMedian(my_id, num_procs, proc_data_length, dist_data, median_value);
     free(dist_data);
     ierr
         = MPI_Finalize();
