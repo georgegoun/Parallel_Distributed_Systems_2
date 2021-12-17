@@ -25,20 +25,19 @@ int main(int argc, char* argv[])
     if (PowerOfTwo(num_procs) == 0) {
         if (my_id == 0) {
             printf("Please enter power of 2 processes\n");
+            MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
             return 0;
         }
     }
     int proc_data_length = data_length / num_procs;
 
     double* dist_data = malloc(sizeof(double) * proc_data_length);
-    MPI_Barrier(MPI_COMM_WORLD);
-
     median_value
         = median(my_id, num_procs, data_length, data, dist_data);
+
     // distributeByMedian(my_id, num_procs, proc_data_length, dist_data, median_value);
     printf("allok %i\n", my_id);
     free(dist_data);
-    MPI_Barrier(MPI_COMM_WORLD);
     ierr
         = MPI_Finalize();
 
