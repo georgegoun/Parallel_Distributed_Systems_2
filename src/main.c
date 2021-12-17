@@ -1,8 +1,10 @@
-#include "../include/functions/pivotStart.h"
+#include "../include/functions/distributeByMedian.h"
+#include "../include/functions/median.h"
 #include "../include/helpers/PowerOfTwo.h"
 //#include "../include/helpers/quickSort.h"
 #include <mpi.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 int main(int argc, char* argv[])
 {
@@ -10,7 +12,10 @@ int main(int argc, char* argv[])
     int data_length
         = sizeof(data) / sizeof(data[0]);
     int ierr, num_procs, my_id;
-    //MPI
+
+    double median_value = 0;
+
+    // MPI
 
     ierr = MPI_Init(&argc, &argv);
 
@@ -23,10 +28,19 @@ int main(int argc, char* argv[])
             return 0;
         }
     }
+    int proc_data_length = data_length / num_procs;
 
-    pivotStart(my_id, num_procs, data_length, data);
+    double* dist_data = malloc(sizeof(double) * proc_data_length);
+    MPI_Barrier(MPI_COMM_WORLD);
 
+    median_value
+        = median(my_id, num_procs, data_length, data, dist_data);
+    // distributeByMedian(my_id, num_procs, proc_data_length, dist_data, median_value);
+    printf("allok %i\n", my_id);
+    free(dist_data);
+    MPI_Barrier(MPI_COMM_WORLD);
     ierr
         = MPI_Finalize();
+
     return 0;
 }
