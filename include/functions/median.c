@@ -12,7 +12,7 @@ double median(int my_id, int num_procs, int data_length, int* data, double* dist
 
     int seperator = 0;
     int pivot = 0;
-    //double* pro_data_distance = malloc((sizeof(double) * seperator));
+    // double* pro_data_distance = malloc((sizeof(double) * seperator));
     int err, len;
     char buffer[MPI_MAX_ERROR_STRING];
 
@@ -35,7 +35,7 @@ double median(int my_id, int num_procs, int data_length, int* data, double* dist
         srand(time(NULL));
         pivot = parent_data[(rand() % seperator)];
 
-        //MPI_Barrier
+        // MPI_Barrier
 
         for (int i = 1; i < num_procs; i++) {
             err = MPI_Send(&pivot, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
@@ -71,22 +71,17 @@ double median(int my_id, int num_procs, int data_length, int* data, double* dist
         // MPI_Barrier
         for (int i = 1; i < num_procs; i++) {
             MPI_Recv(pro_data_distance, seperator, MPI_DOUBLE, i, 1, MPI_COMM_WORLD, &status);
-            //printf("ID: %i received data: pro_data_distance from src: %i / tag: %i\n", my_id, status.MPI_SOURCE, status.MPI_TAG);
-            // MPI_Barrier(MPI_COMM_WORLD);
+            // printf("ID: %i received data: pro_data_distance from src: %i / tag: %i\n", my_id, status.MPI_SOURCE, status.MPI_TAG);
+            //  MPI_Barrier(MPI_COMM_WORLD);
             for (int j = 0; j < seperator; j++) {
                 dist_data[(i * seperator) + j] = pro_data_distance[j];
             }
         }
-        //free(pro_data_distance_received);
-        // MPI_Gather(&my_value, seperator, MPI_DOUBLE, buffer, seperator*num_procs, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+        // free(pro_data_distance_received);
+        //  MPI_Gather(&my_value, seperator, MPI_DOUBLE, buffer, seperator*num_procs, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
         int n
             = data_length;
-        if (n % 2 == 0) {
-            median = (quickselect(dist_data, 0, n - 1, n / 2) + quickselect(dist_data, 0, n - 1, (n / 2) - 1)) / 2;
-        } else {
-            median = quickselect(dist_data, 0, n - 1, n / 2);
-        }
         for (int i = 1; i < num_procs; i++) {
             err = MPI_Send(dist_data, data_length, MPI_DOUBLE, i, 3, MPI_COMM_WORLD);
             if (err) {
@@ -94,14 +89,35 @@ double median(int my_id, int num_procs, int data_length, int* data, double* dist
                 printf("Error %i [%s] at %s:%i\n", i, buffer, __FILE__, __LINE__);
             }
         }
+        double* testing = malloc(sizeof(double) * data_length);
+        for (int i = 0; i < data_length; i++) {
+            testing[i] = dist_data[i];
+        }
+        if (n % 2 == 0) {
+            median = (quickselect(testing, 0, n - 1, (n / 2) - 1) + quickselect(testing, 0, n - 1, (n / 2))) / 2;
+        } else {
+            median = quickselect(testing, 0, n - 1, n / 2);
+        }
+        printf("testing: ");
+        for (int i = 0; i < data_length; i++) {
+            printf(" %.2lf", testing[i]);
+        }
+        printf("\n");
 
-        //| printf("median is: %.2lf\n", median);
-        // for (int i = 0; i < n; i++) {
-        //     printf(" %.2lf", all_distances[i]);
+        // if (n % 2 == 0) {
+        //     median = (quickselect(dist_data, 0, n - 1, n / 2) + quickselect(dist_data, 0, n - 1, (n / 2) - 1)) / 2;
+        // } else {
+        //     median = quickselect(dist_data, 0, n - 1, n / 2);
         // }
-        // printf("\n");
 
-        // MPI_Barrier
+        // for (int i = 1; i < num_procs; i++) {
+        //     err = MPI_Send(dist_data, data_length, MPI_DOUBLE, i, 3, MPI_COMM_WORLD);
+        //     if (err) {
+        //         MPI_Error_string(err, buffer, &len);
+        //         printf("Error %i [%s] at %s:%i\n", i, buffer, __FILE__, __LINE__);
+        //     }
+        // }
+
         for (int i = 1; i < num_procs; i++) {
             err = MPI_Send(&median, 1, MPI_DOUBLE, i, 2, MPI_COMM_WORLD);
             if (err) {
@@ -116,13 +132,13 @@ double median(int my_id, int num_procs, int data_length, int* data, double* dist
     } else {
 
         int* pro_data = malloc((sizeof(int) * seperator));
-        //pro_data = &data[seperator * my_id];
+        // pro_data = &data[seperator * my_id];
         for (int i = 0; i < seperator; i++) {
             pro_data[i] = data[i + (my_id * seperator)];
         }
 
         MPI_Recv(&pivot, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &status);
-        //printf("ID: %i received data: pivot from src: %i / tag: %i\n", my_id, status.MPI_SOURCE, status.MPI_TAG);
+        // printf("ID: %i received data: pivot from src: %i / tag: %i\n", my_id, status.MPI_SOURCE, status.MPI_TAG);
 
         // MPI_Barrier
 
@@ -160,7 +176,7 @@ double median(int my_id, int num_procs, int data_length, int* data, double* dist
         // Recieve median
 
         MPI_Recv(&median, 1, MPI_DOUBLE, 0, 2, MPI_COMM_WORLD, &status);
-        //printf("ID: %i received data: %.2lf median from src: %i / tag: %i\n", my_id, median, status.MPI_SOURCE, status.MPI_TAG);
+        // printf("ID: %i received data: %.2lf median from src: %i / tag: %i\n", my_id, median, status.MPI_SOURCE, status.MPI_TAG);
 
         // for (int i = 0; i < seperator; i++) {
         //     dist_data[(my_id)*seperator + i] = pro_data_distance[i];

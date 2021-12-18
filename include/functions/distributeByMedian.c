@@ -7,6 +7,9 @@
 
 void distributeByMedian(int my_id, int num_procs, int data_length, double* dist_data, double median_value)
 {
+    MPI_Status status;
+    int err, len;
+    char buffer[MPI_MAX_ERROR_STRING];
 
     int proc_data_length = data_length / num_procs;
     double* proc_dist_data = malloc(sizeof(double) * proc_data_length);
@@ -21,21 +24,22 @@ void distributeByMedian(int my_id, int num_procs, int data_length, double* dist_
     // for (int i = 0; i < proc_data_length; i++) {
     //     printf("%.2lf ", dist_data[i]);
     // }
+
     if (my_id < num_procs / 2) {
         int counter = 0;
-        printf("ID: %d  Median Value: %.2lf\nData: ", my_id, median_value);
+        printf("ID: %d  Median Value: %.2lf\nData:\t\t", my_id, median_value);
         for (int i = 0; i < proc_data_length; i++) {
             printf("%.2lf ", proc_dist_data[i]);
         }
 
-        printf("Before\n");
+        printf("\nBefore:\t\t");
         for (int i = 0; i < proc_data_length; i++) {
             printf("%.2lf ", proc_dist_data[i]);
         }
         printf("\n");
         for (int i = 0, j = 1; i < proc_data_length; i++) {
             // TODO remove -1
-            if (proc_dist_data[i] >= median_value - 1) {
+            if (proc_dist_data[i] >= median_value) {
                 data_to_send[j] = proc_dist_data[i];
                 counter++;
                 // Remove elements from array without keeping the same order
@@ -46,11 +50,11 @@ void distributeByMedian(int my_id, int num_procs, int data_length, double* dist_
                 // TODO: DATA SEND EVERY PROCESS HOW MANY TO CHANGE
             }
         }
-        printf("After\n");
+        printf("After:\t\t");
         for (int i = 0; i < proc_data_length; i++) {
             printf("%.2lf ", proc_dist_data[i]);
         }
-        printf("\n");
+        printf("\nCounter:\t%d", counter);
 
         data_to_send[0] = counter;
         printf("\nData to send: ");
@@ -62,9 +66,47 @@ void distributeByMedian(int my_id, int num_procs, int data_length, double* dist_
         printf("\n");
 
         // Distribution
-    }
-    // TODO: 0 to change to ~=num_procs
-    /*
+
+        // TODO: 0 and 1 to change to ~=num_procs
+        // 0 to (num_procs/2)-1
+        // 1 to num_procs
+        if (my_id == 0) {
+            double** all_data_to_send;
+            all_data_to_send
+                = malloc(sizeof(double*) * (num_procs / 2));
+
+            all_data_to_send[0] = (double*)malloc((data_to_send[0] + 1) * sizeof(double));
+            all_data_to_send[0] = data_to_send;
+
+            for (int i = 1; i < num_procs / 2; i++) {
+                double size = 0;
+                MPI_Recv(&size, 1, MPI_DOUBLE, i, 4, MPI_COMM_WORLD, &status);
+                all_data_to_send[i] = (double*)malloc((size + 1) * sizeof(double));
+                MPI_Recv(all_data_to_send[i], size + 1, MPI_DOUBLE, i, 5, MPI_COMM_WORLD, &status);
+            }
+            printf("0: All Data Gathered: \n");
+            for (int i = 0; i < num_procs / 2; i++) {
+                for (int j = 0; j < all_data_to_send[i][0] + 1; j++) {
+                    printf("%.2lf ", all_data_to_send[i][j]);
+                }
+                printf("\n");
+            }
+        }
+
+        if (my_id > 0 && my_id < num_procs / 2) {
+            err = MPI_Send(&data_to_send[0], 1, MPI_DOUBLE, 0, 4, MPI_COMM_WORLD);
+            if (err) {
+                MPI_Error_string(err, buffer, &len);
+                printf("Error %d [%s] at %s:%i\n", my_id, buffer, __FILE__, __LINE__);
+            }
+            err = MPI_Send(data_to_send, data_to_send[0] + 1, MPI_DOUBLE, 0, 5, MPI_COMM_WORLD);
+            if (err) {
+                MPI_Error_string(err, buffer, &len);
+                printf("Error %d [%s] at %s:%i\n", my_id, buffer, __FILE__, __LINE__);
+            }
+        }
+
+        /*
         if (my_id == 0) {
         double** trading_values = NULL;
         // trading_values[my_id] = data_to_send;
@@ -84,21 +126,22 @@ void distributeByMedian(int my_id, int num_procs, int data_length, double* dist_
         }
         }
         */
-    else {
+    } else {
         int counter = 0;
-        printf("ID: %d  Median Value: %.2lf\nData: ", my_id, median_value);
+
+        printf("ID: %d  Median Value: %.2lf\nData:\t\t", my_id, median_value);
         for (int i = 0; i < proc_data_length; i++) {
             printf("%.2lf ", proc_dist_data[i]);
         }
 
-        printf("Before\n");
+        printf("\nBefore:\t\t");
         for (int i = 0; i < proc_data_length; i++) {
             printf("%.2lf ", proc_dist_data[i]);
         }
         printf("\n");
         for (int i = 0, j = 1; i < proc_data_length; i++) {
             // TODO remove -1
-            if (proc_dist_data[i] < median_value + 1) {
+            if (proc_dist_data[i] < median_value) {
                 data_to_send[j] = proc_dist_data[i];
                 counter++;
                 // Remove elements from array without keeping the same order
@@ -109,11 +152,11 @@ void distributeByMedian(int my_id, int num_procs, int data_length, double* dist_
                 // TODO: DATA SEND EVERY PROCESS HOW MANY TO CHANGE
             }
         }
-        printf("After\n");
+        printf("After:\t\t");
         for (int i = 0; i < proc_data_length; i++) {
             printf("%.2lf ", proc_dist_data[i]);
         }
-        printf("\n");
+        printf("\nCounter:\t%d", counter);
         data_to_send[0]
             = counter;
         printf("\nData to send: ");
@@ -125,6 +168,42 @@ void distributeByMedian(int my_id, int num_procs, int data_length, double* dist_
         printf("\n");
 
         // Distribution
+
+        if (my_id == 4) {
+            double** all_data_to_send;
+            all_data_to_send
+                = malloc(sizeof(double*) * (num_procs / 2));
+            printf("\n\nok ko\n\n");
+            all_data_to_send[0] = (double*)malloc((data_to_send[0] + 1) * sizeof(double));
+            all_data_to_send[0] = data_to_send;
+
+            for (int i = 1; i < num_procs / 2; i++) {
+                double size = 0;
+                MPI_Recv(&size, 1, MPI_DOUBLE, i + (num_procs / 2), 6, MPI_COMM_WORLD, &status);
+                all_data_to_send[i] = (double*)malloc((size + 1) * sizeof(double));
+                MPI_Recv(all_data_to_send[i], size + 1, MPI_DOUBLE, i + (num_procs / 2), 7, MPI_COMM_WORLD, &status);
+            }
+            printf("4: All Data Gathered: \n");
+            for (int i = 0; i < num_procs / 2; i++) {
+                for (int j = 0; j < all_data_to_send[i][0] + 1; j++) {
+                    printf("%.2lf ", all_data_to_send[i][j]);
+                }
+                printf("\n");
+            }
+        }
+
+        if (my_id > 4 && my_id < num_procs) {
+            err = MPI_Send(&data_to_send[0], 1, MPI_DOUBLE, 4, 6, MPI_COMM_WORLD);
+            if (err) {
+                MPI_Error_string(err, buffer, &len);
+                printf("Error %d [%s] at %s:%i\n", my_id, buffer, __FILE__, __LINE__);
+            }
+            err = MPI_Send(data_to_send, data_to_send[0] + 1, MPI_DOUBLE, 4, 7, MPI_COMM_WORLD);
+            if (err) {
+                MPI_Error_string(err, buffer, &len);
+                printf("Error %d [%s] at %s:%i\n", my_id, buffer, __FILE__, __LINE__);
+            }
+        }
     }
 }
 

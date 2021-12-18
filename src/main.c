@@ -8,7 +8,7 @@
 
 int main(int argc, char* argv[])
 {
-    int data[] = { 2, 5, 1, 7, 9, 1, 2, 6, 8, 3, 9, 1, 5, 2, 6, 3, 7, 0, 1, 9, 4, 8, 2, 1, 4, 9, 0, 2, 3, 7, 0, 4 };
+    int data[] = { 20, 51, 12, 73, 94, 15, 26, 67, 88, 39, 90, 11, 52, 23, 64, 35, 76, 7, 18, 99, 40, 81, 22, 13, 44, 95, 6, 27, 38, 79, 0, 41 };
     int data_length
         = sizeof(data) / sizeof(data[0]);
     int ierr, num_procs, my_id;
@@ -33,11 +33,14 @@ int main(int argc, char* argv[])
     double* dist_data = malloc(sizeof(double) * data_length);
     median_value
         = median(my_id, num_procs, data_length, data, dist_data);
-    // printf("ID: %d......", my_id);
-    // for (int i = 0; i < data_length; i++) {
-    //     printf("%.2lf ", dist_data[i]);
-    // }
-    // printf("\n");
+    if (my_id == 0) {
+        printf("ID: %d.....", my_id);
+        for (int i = 0; i < data_length; i++) {
+            printf("%.2lf ", dist_data[i]);
+        }
+        printf("\n");
+    }
+
     distributeByMedian(my_id, num_procs, data_length, dist_data, median_value);
     //free(dist_data);
     ierr
