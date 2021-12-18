@@ -38,8 +38,8 @@ int main(int argc, char* argv[])
     //     printf("%.2lf ", dist_data[i]);
     // }
     // printf("\n");
-    //distributeByMedian(my_id, num_procs, proc_data_length, dist_data, median_value);
-    free(dist_data);
+    distributeByMedian(my_id, num_procs, data_length, dist_data, median_value);
+    //free(dist_data);
     ierr
         = MPI_Finalize();
 
