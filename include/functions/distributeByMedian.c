@@ -1,18 +1,22 @@
 #include "distributeByMedian.h"
 #include "../helpers/eucDist.h"
+#include "../helpers/quickSelect.h"
 #include "../helpers/removeElement.h"
 #include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-void distributeByMedian(int my_id, int num_procs, int data_length, double* dist_data, double median_value)
+void distributeByMedian(int my_id, int num_procs, int data_length, double* dist_data, double median_value, int low, int high)
 {
     MPI_Status status;
     int err, len;
     char buffer[MPI_MAX_ERROR_STRING];
 
     int proc_data_length = data_length / num_procs;
+    int proc_rec_length = data_length / num_procs;
+    int proc_rec_data_length = (high - low + 1) * proc_rec_length;
     double* proc_dist_data = malloc(sizeof(double) * proc_data_length);
+
     for (int i = 0; i < proc_data_length; i++) {
         proc_dist_data[i] = dist_data[my_id * proc_data_length + i];
     }
@@ -20,10 +24,25 @@ void distributeByMedian(int my_id, int num_procs, int data_length, double* dist_
     // +1 because first element is the counter of how many elements to be exchanged
     double* data_to_send = malloc(sizeof(double) * (proc_data_length + 1));
 
-    // printf("\t1||ID: %d  Median Value: %.2lf  Data: ", my_id, median_value);
-    // for (int i = 0; i < proc_data_length; i++) {
-    //     printf("%.2lf ", dist_data[i]);
-    // }
+    if (my_id == 0) {
+        double* testing = malloc(sizeof(double) * proc_rec_data_length);
+        for (int i = 0; i < proc_rec_data_length; i++) {
+            testing[i] = dist_data[i + (low * proc_rec_length)];
+        }
+        if (proc_rec_data_length % 2 == 0) {
+            median_value = (quickselect(testing, 0, proc_rec_data_length - 1, (proc_rec_data_length / 2) - 1) + quickselect(testing, 0, proc_rec_data_length - 1, (proc_rec_data_length / 2))) / 2;
+        } else {
+            median_value = quickselect(testing, 0, proc_rec_data_length - 1, proc_rec_data_length / 2);
+        }
+        for (int i = low; i < high + 1; i++) {
+            err = MPI_Send(&median_value, 1, MPI_DOUBLE, i, 100, MPI_COMM_WORLD);
+            if (err) {
+                MPI_Error_string(err, buffer, &len);
+                printf("Error %d [%s] at %s:%i\n", my_id, buffer, __FILE__, __LINE__);
+            }
+        }
+    }
+    MPI_Recv(&median_value, 1, MPI_DOUBLE, 0, 100, MPI_COMM_WORLD, &status);
 
     if (my_id < num_procs / 2) {
         int counter = 0;

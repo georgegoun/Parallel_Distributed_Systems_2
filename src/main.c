@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
         printf("\n");
     }
 
-    distributeByMedian(my_id, num_procs, data_length, dist_data, median_value);
+    distributeByMedian(my_id, num_procs, data_length, dist_data, 0, 0, 7);
     //free(dist_data);
     ierr
         = MPI_Finalize();
