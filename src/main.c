@@ -41,8 +41,18 @@ int main(int argc, char* argv[])
         printf("\n");
     }
 
-    distributeByMedian(my_id, num_procs, data_length, dist_data, 0, 0, 7);
-    //free(dist_data);
+    double* proc_data = malloc(sizeof(double) * (data_length / num_procs));
+    for (int i = 0; i < (data_length / num_procs); i++) {
+        proc_data[i] = dist_data[my_id * (data_length / num_procs) + i];
+    }
+    distributeByMedian(my_id, num_procs, data_length, proc_data, 0, num_procs - 1);
+    //distributeByMedian(my_id, num_procs, data_length, dist_data, 0, 0, num_procs - 1);
+    // free(dist_data);
+    printf("_ID: %d Data: ", my_id);
+    for (int i = 0; i < (data_length / num_procs); i++) {
+        printf("%.2lf ", proc_data[i]);
+    }
+    printf("\n");
     ierr
         = MPI_Finalize();
 

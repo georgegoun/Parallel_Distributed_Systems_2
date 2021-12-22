@@ -3,6 +3,7 @@
 
 
 #include <stdio.h>
-void distributeByMedian(int my_id,int num_procs, int proc_data_length, double* dist_data, double median_value,int low,int high);
+//void distributeByMedian(int my_id,int num_procs, int proc_data_length, double* dist_data, double median_value,int low,int high);
+void distributeByMedian(int my_id,int num_procs, int data_length, double* proc_data,int low,int high);
 
 #endif
