@@ -1,7 +1,7 @@
 #include "../include/functions/distributeByMedian.h"
 #include "../include/functions/median.h"
+#include "../include/functions/selfValidation.h"
 #include "../include/helpers/PowerOfTwo.h"
-//#include "../include/helpers/quickSort.h"
 #include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -46,8 +46,8 @@ int main(int argc, char* argv[])
         proc_data[i] = dist_data[my_id * (data_length / num_procs) + i];
     }
     distributeByMedian(my_id, num_procs, data_length, proc_data, 0, num_procs - 1);
-    //distributeByMedian(my_id, num_procs, data_length, dist_data, 0, 0, num_procs - 1);
-    // free(dist_data);
+    selfValidation(my_id, num_procs, data_length / num_procs, proc_data);
+    //  free(dist_data);
     printf("_ID: %d Data: ", my_id);
     for (int i = 0; i < (data_length / num_procs); i++) {
         printf("%.2lf ", proc_data[i]);

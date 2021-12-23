@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// MPI CODES
 // 0: receive data for median number
 // 1: announcing median number
 // 2: sending data for exchange to captain
@@ -13,11 +14,12 @@
 // 4: sending to all processes thedistribution data
 void distributeByMedian(int my_id, int num_procs, int data_length, double* proc_data, int low, int high)
 {
-
+    // Recursion Stopper
     if (low == high) {
         return;
     }
 
+    // MPI error variables
     MPI_Status status;
     int err, len;
     char buffer[MPI_MAX_ERROR_STRING];
@@ -41,14 +43,6 @@ void distributeByMedian(int my_id, int num_procs, int data_length, double* proc_
         MPI_Error_string(err, buffer, &len);
         printf("Error %d [%s] at %s:%i\n", my_id, buffer, __FILE__, __LINE__);
     }
-
-    // Testing Data Before
-
-    // printf("ID: %d Data Before: ", my_id);
-    // for (int i = 0; i < proc_data_length; i++) {
-    //     printf("%.2lf ", proc_data[i]);
-    // }
-    // printf("\n");
 
     // Captain Process announcing median number
 
@@ -123,14 +117,6 @@ void distributeByMedian(int my_id, int num_procs, int data_length, double* proc_
         }
     }
 
-    // Testing Data After
-
-    // printf("ID: %d Data After: ", my_id);
-    // for (int i = 0; i < proc_data_median_length; i++) {
-    //     printf("%.2lf ", proc_data_median[i]);
-    // }
-    // printf("\n");
-
     // Counter of how many elements stored and ready to received
     proc_data_to_send[0] = (double)counter;
 
@@ -164,18 +150,6 @@ void distributeByMedian(int my_id, int num_procs, int data_length, double* proc_
             printf("Error in your database\n");
             exit(EXIT_FAILURE);
         }
-
-        // Testing Distribution Data
-
-        // printf("Distr data: \n");
-        // for (int i = 0; i < rec_num_procs; i++) {
-
-        //     printf("ID_d: %d|| ", i);
-        //     for (int j = 0; j < distr_data[i][0]; j++) {
-        //         printf("%.2lf ", distr_data[i][j + 1]);
-        //     }
-        //     printf("\n");
-        // }
 
         // Left - Right Distribution
 
