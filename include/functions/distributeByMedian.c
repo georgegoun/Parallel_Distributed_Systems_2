@@ -1,5 +1,4 @@
 #include "distributeByMedian.h"
-#include "../helpers/eucDist.h"
 #include "../helpers/quickSelect.h"
 #include "../helpers/removeElement.h"
 #include <mpi.h>
@@ -12,7 +11,7 @@
 // 2: sending data for exchange to captain
 // 3: ---""---
 // 4: sending to all processes thedistribution data
-void distributeByMedian(int my_id, int num_procs, int data_length, double* proc_data, int low, int high)
+void distributeByMedian(int my_id, int num_procs, int proc_data_length, double* proc_data, int low, int high)
 {
     // Recursion Stopper
     if (low == high) {
@@ -24,7 +23,7 @@ void distributeByMedian(int my_id, int num_procs, int data_length, double* proc_
     int err, len;
     char buffer[MPI_MAX_ERROR_STRING];
 
-    int proc_data_length = data_length / num_procs;
+    // int proc_data_length = data_length / num_procs;
 
     // Recursion variables
 
@@ -214,8 +213,8 @@ void distributeByMedian(int my_id, int num_procs, int data_length, double* proc_
 
     // Recursion call
     if (my_id <= split) {
-        distributeByMedian(my_id, num_procs, data_length, proc_data, split - split_count, split);
+        distributeByMedian(my_id, num_procs, proc_data_length, proc_data, split - split_count, split);
     } else {
-        distributeByMedian(my_id, num_procs, data_length, proc_data, split + 1, split + split_count + 1);
+        distributeByMedian(my_id, num_procs, proc_data_length, proc_data, split + 1, split + split_count + 1);
     }
 }
