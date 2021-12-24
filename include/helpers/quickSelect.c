@@ -18,8 +18,8 @@ int partition(double arr[], int left, int right, int pIndex)
     // Move pivot to end
     swap(&arr[pIndex], &arr[right]);
 
-    // elements less than the pivot will be pushed to the left of `pIndex`;
-    // elements more than the pivot will be pushed to the right of `pIndex`;
+    // elements < pivot, will be pushed to the left of `pIndex`;
+    // elements > pivot, will be pushed to the right of `pIndex`;
     // equal elements can go either way
     pIndex = left;
 
@@ -40,14 +40,11 @@ int partition(double arr[], int left, int right, int pIndex)
 }
 
 // Returns the k'th smallest element in the list within `left…right`
-// (i.e., left <= k <= right). The search space within the array is
-// changing for each round – but the list is still the same size.
-// Thus, `k` does not need to be updated with each round.
 double quickselect(double arr[], int left, int right, int k)
 {
     // If the array contains only one element, return that element
     if (left == right) {
-        //printf("Inside function calling 1st bracket value: %.2lf\n", arr[left]);
+        // printf("Inside function calling 1st bracket value: %.2lf\n", arr[left]);
 
         return arr[left];
     }
@@ -59,7 +56,7 @@ double quickselect(double arr[], int left, int right, int k)
 
     // The pivot is in its final sorted position
     if (k == pIndex) {
-        //printf("Inside function calling 2nd bracket value: %.2lf\n", arr[k]);
+        // printf("Inside function calling 2nd bracket value: %.2lf\n", arr[k]);
 
         return arr[k];
 

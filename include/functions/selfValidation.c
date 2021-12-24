@@ -43,6 +43,5 @@ int selfValidation(int my_id, int num_procs, int proc_data_length, double* proc_
             }
         }
     }
-
     return 1;
 }

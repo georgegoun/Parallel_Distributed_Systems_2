@@ -194,6 +194,8 @@ void distributeByMedian(int my_id, int num_procs, int proc_data_length, double* 
             }
             free(sending);
         }
+        free(distr1d_left_arr);
+        free(distr1d_right_arr);
     }
 
     // Receiving new data
@@ -210,6 +212,7 @@ void distributeByMedian(int my_id, int num_procs, int proc_data_length, double* 
         proc_data[i + proc_data_median_length] = proc_data_recv[i];
     }
     free(proc_data_recv);
+    free(proc_data_median);
 
     // Recursion call
     if (my_id <= split) {

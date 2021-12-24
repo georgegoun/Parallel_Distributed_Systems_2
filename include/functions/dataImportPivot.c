@@ -19,7 +19,7 @@ void dataImportPivot(int my_id, int num_procs, double** proc_data, int* data_len
     size_t len = 0;
     size_t read;
 
-    fp = fopen("../data/iris.csv", "r");
+    fp = fopen("../data/mnist_train.csv", "r");
     if (fp == NULL) {
         exit(EXIT_FAILURE);
     }
